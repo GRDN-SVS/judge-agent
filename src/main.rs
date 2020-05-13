@@ -21,6 +21,7 @@ mod crypto;
 mod database;
 mod handlers;
 mod models;
+mod services;
 
 use database::executor::DBExecutor;
 
@@ -33,14 +34,17 @@ async fn main() -> std::io::Result<()> {
         process::exit(1);
     }
 
-    let (public_key, secret_key) = gen_keypair();
-
     let addr = actix::SyncArbiter::start(2, || {
         DBExecutor::new(&env::var("DATABASE_URL").expect("No DATABASE_URL in .env"))
     });
 
-    HttpServer::new(move || App::new().data(config::State { db: addr.clone() }))
-        .bind("127.0.0.1:8080")?
-        .run()
-        .await
+    HttpServer::new(move || {
+        App::new()
+            .data(config::State { db: addr.clone() })
+            .data(crypto::Encrypter::new())
+            .service(handlers::vote::encrypt_and_submit_vote)
+    })
+    .bind("127.0.0.1:8080")?
+    .run()
+    .await
 }

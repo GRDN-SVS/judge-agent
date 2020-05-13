@@ -5,7 +5,8 @@ use serde::{Deserialize, Serialize};
 #[derive(Queryable, Serialize)]
 pub struct Vote {
     pub id: i32,
-    pub vote: Vec<u8>,
+    pub encrypted_vote: Vec<u8>,
+    pub nonce_id: i32,
 }
 
 /// Struct used to insert a new Vote inside the database
@@ -14,6 +15,7 @@ pub struct Vote {
 pub struct InsertableVote {
     /// Encrypted vote to be stored in database
     pub encrypted_vote: Vec<u8>,
+    pub nonce_id: i32,
 }
 
 /// Representation of a Vote that comes from an HTTP request

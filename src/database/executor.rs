@@ -29,6 +29,7 @@ impl Actor for DBExecutor {
 /// tell it to save a vote to the database.
 pub struct SaveVote {
     pub encrypted_vote: Vec<u8>,
+    pub nonce_id: i32,
 }
 
 impl Message for SaveVote {
@@ -41,6 +42,7 @@ impl Handler<SaveVote> for DBExecutor {
     fn handle(&mut self, msg: SaveVote, _: &mut Self::Context) -> Self::Result {
         let insertable_vote = models::InsertableVote {
             encrypted_vote: msg.encrypted_vote,
+            nonce_id: msg.nonce_id,
         };
 
         let vote_obj = diesel::insert_into(votes::table)
@@ -48,5 +50,29 @@ impl Handler<SaveVote> for DBExecutor {
             .get_result(&self.0)?;
 
         Ok(vote_obj)
+    }
+}
+
+/// Message that can be sent to the DBExecutor to
+/// tell it to save a vote to the database
+pub struct GetNonce {
+    pub nonce_id: i32,
+}
+
+impl Message for GetNonce {
+    type Result = Result<models::Nonce, diesel::result::Error>;
+}
+
+impl Handler<GetNonce> for DBExecutor {
+    type Result = Result<models::Nonce, diesel::result::Error>;
+
+    fn handle(&mut self, msg: GetNonce, _: &mut Self::Context) -> Self::Result {
+        let query_string = format!("SELECT FIRST(id) FROM nonces WHERE id == {}", &msg.nonce_id);
+        let nonce_ref: &models::Nonce = &diesel::sql_query(query_string).load(&self.0)?[0];
+        // we have to move the instance into this variable
+        // TODO: maybe consider using a Box<> (pointer) to that instance instead
+        let nonce_obj: models::Nonce = nonce_ref.clone();
+
+        Ok(nonce_obj)
     }
 }
