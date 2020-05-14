@@ -19,7 +19,10 @@ pub struct InsertableVote {
 }
 
 /// Representation of a Vote that comes from an HTTP request
-/// as a JSON string
+/// as a JSON string.
+/// It's fields are not in camel case because that is how the
+/// source emits them.
+#[allow(non_snake_case)]
 #[derive(Deserialize)]
 pub struct RequestVote {
     pub nonceId: i32,

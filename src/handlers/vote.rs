@@ -1,4 +1,5 @@
 use actix_web::{post, web, HttpResponse, Responder};
+use std::sync::Arc;
 
 use super::messages;
 use crate::crypto;
@@ -14,7 +15,7 @@ use crate::{
 pub async fn encrypt_and_submit_vote(
     vote: web::Json<RequestVote>,
     state: web::Data<State>,
-    encrypter: web::Data<crypto::Encrypter>,
+    encrypter: web::Data<Arc<crypto::Encrypter>>,
 ) -> impl Responder {
     let db_executor = &state.db;
 
@@ -27,7 +28,7 @@ pub async fn encrypt_and_submit_vote(
     {
         Ok(nonce_instance) => nonce_instance,
         Err(_) => {
-            return HttpResponse::Ok().json(messages::NonceNotFoundError {
+            return HttpResponse::Ok().json(messages::error::NonceNotFound {
                 code: 404,
                 error: String::from("Nonce Not Found!"),
             })
@@ -37,21 +38,21 @@ pub async fn encrypt_and_submit_vote(
     let scrutinizer_service = match ScrutinizerService::new().await {
         Ok(instance) => instance,
         Err(_) => {
-            return HttpResponse::Ok().json(messages::NoScrutinizerFoundError {
+            return HttpResponse::Ok().json(messages::error::NoScrutinizerFound {
                 code: 404,
                 error: String::from("Scrutinizer Not Found!"),
             })
         }
     };
     // encrypt the vote by sealing it and by using the scrutinizer's public key
-    let signed_vote = encrypter.sign(vote.encryptedVote.clone());
+    let signed_vote = encrypter.sign(&vote.encryptedVote);
     let encrypted_vote = encrypter.seal(
         signed_vote,
         &nonce_obj.nonce,
         &scrutinizer_service.public_key,
     );
 
-    let inserted_vote = db_executor
+    let _inserted_vote = db_executor
         .send(SaveVote {
             encrypted_vote,
             nonce_id: nonce_obj.id,
@@ -60,7 +61,7 @@ pub async fn encrypt_and_submit_vote(
         .unwrap()
         .unwrap();
 
-    HttpResponse::Ok().json(messages::VoteStoredSuccess {
+    HttpResponse::Ok().json(messages::success::VoteStored {
         code: 201,
         success: String::from("Vote successfully encrypted and stored"),
     })

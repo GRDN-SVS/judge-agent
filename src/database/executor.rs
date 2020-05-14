@@ -67,10 +67,8 @@ impl Handler<GetNonce> for DBExecutor {
     type Result = Result<models::Nonce, diesel::result::Error>;
 
     fn handle(&mut self, msg: GetNonce, _: &mut Self::Context) -> Self::Result {
-        let query_string = format!("SELECT FIRST(id) FROM nonces WHERE id == {}", &msg.nonce_id);
+        let query_string = format!("SELECT * FROM nonces WHERE id = {}", &msg.nonce_id);
         let nonce_ref: &models::Nonce = &diesel::sql_query(query_string).load(&self.0)?[0];
-        // we have to move the instance into this variable
-        // TODO: maybe consider using a Box<> (pointer) to that instance instead
         let nonce_obj: models::Nonce = nonce_ref.clone();
 
         Ok(nonce_obj)
