@@ -1,8 +1,8 @@
-FROM rust:latest
+FROM rust:latest 
 
 WORKDIR /usr/src/judge-agent
 COPY . .
 
 RUN cargo build --release
 
-CMD ["/target/release/judge-agent"]
+CMD ["./target/release/judge-agent"]
