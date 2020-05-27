@@ -47,7 +47,7 @@ async fn main() -> std::io::Result<()> {
             .service(handlers::vote::encrypt_and_submit_vote)
             .service(handlers::public_key::public_key)
     })
-    .bind("ec2-54-157-184-196.compute-1.amazonaws.com:8080")?
+    .bind(format!("{}:8080", &env::var("APP_URL").expect("No APP_URL in .env")))?
     .run()
     .await
 }
