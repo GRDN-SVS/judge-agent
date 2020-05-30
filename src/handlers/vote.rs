@@ -44,7 +44,7 @@ pub async fn encrypt_and_submit_vote(
             })
         }
     };
-    // encrypt the vote by sealing it and by using the scrutinizer's public key
+    // encrypt the vote by signing it and by using the scrutinizer's public key
     let signed_vote = encrypter.sign(&vote.encryptedVote);
     let encrypted_vote = encrypter.seal(
         signed_vote,
@@ -56,6 +56,7 @@ pub async fn encrypt_and_submit_vote(
         .send(SaveVote {
             encrypted_vote,
             nonce_id: nonce_obj.id,
+            voter_public_key: vote.clientPublicKey.clone(),
         })
         .await
         .unwrap()
