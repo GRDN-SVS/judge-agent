@@ -30,6 +30,7 @@ impl Actor for DBExecutor {
 pub struct SaveVote {
     pub encrypted_vote: Vec<u8>,
     pub nonce_id: i32,
+    pub voter_public_key: Vec<u8>,
 }
 
 impl Message for SaveVote {
@@ -43,6 +44,7 @@ impl Handler<SaveVote> for DBExecutor {
         let insertable_vote = models::InsertableVote {
             encrypted_vote: msg.encrypted_vote,
             nonce_id: msg.nonce_id,
+            voter_public_key: msg.voter_public_key,
         };
 
         let vote_obj = diesel::insert_into(votes::table)

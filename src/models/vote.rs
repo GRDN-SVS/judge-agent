@@ -7,6 +7,7 @@ pub struct Vote {
     pub id: i32,
     pub encrypted_vote: Vec<u8>,
     pub nonce_id: i32,
+    pub voter_public_key: Vec<u8>,
 }
 
 /// Struct used to insert a new Vote inside the database
@@ -16,6 +17,7 @@ pub struct InsertableVote {
     /// Encrypted vote to be stored in database
     pub encrypted_vote: Vec<u8>,
     pub nonce_id: i32,
+    pub voter_public_key: Vec<u8>,
 }
 
 /// Representation of a Vote that comes from an HTTP request
