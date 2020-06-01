@@ -45,7 +45,8 @@ async fn main() -> std::io::Result<()> {
             .data(config::State { db: addr.clone() })
             .data(Arc::clone(&encrypter))
             .service(handlers::vote::encrypt_and_submit_vote)
-            .service(handlers::public_key::public_key)
+            .service(handlers::public_key::box_public_key)
+            .service(handlers::public_key::sign_public_key)
     })
     .bind(format!("{}:8080", &env::var("APP_URL").expect("No APP_URL in .env")))?
     .run()

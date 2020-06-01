@@ -37,7 +37,8 @@ pub async fn encrypt_and_submit_vote(
 
     let scrutinizer_service = match ScrutinizerService::new().await {
         Ok(instance) => instance,
-        Err(_) => {
+        Err(e) => {
+            println!("{:?}", e);
             return HttpResponse::Ok().json(messages::error::NoScrutinizerFound {
                 code: 404,
                 error: String::from("Scrutinizer Not Found!"),
@@ -49,7 +50,7 @@ pub async fn encrypt_and_submit_vote(
     let encrypted_vote = encrypter.seal(
         signed_vote,
         &nonce_obj.nonce,
-        &scrutinizer_service.public_key,
+        &scrutinizer_service.box_public_key,
     );
 
     let _inserted_vote = db_executor
