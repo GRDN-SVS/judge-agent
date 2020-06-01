@@ -7,7 +7,7 @@ pub struct ScrutinizerService {
 impl ScrutinizerService {
     pub async fn new() -> Result<ScrutinizerService, reqwest::Error> {
         let public_key_str = reqwest::get(&format!(
-            "{}/publicKey",
+            "{}/boxPublicKey",
             &env::var("SCRUTINIZER_URL").expect("No SCRUTINIZER_URL set in .env")
         ))
         .await?
