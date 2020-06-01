@@ -21,7 +21,7 @@ impl ScrutinizerService {
         let numbers: Vec<&str> = numbers[0].split(',').collect();
 
         for number in numbers.iter() {
-            public_key_vec.push(number.parse::<i32>().unwrap() as u8);
+            public_key_vec.push(number.parse::<u8>().unwrap());
         }
 
         Ok(ScrutinizerService {
